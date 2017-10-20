@@ -5,6 +5,6 @@ Will identify whether server alters it's response depending on which User-Agent 
 Useful for triage during web based malware analysis.
 
 Usage: shape_shift.py <url>
-e.g: shape_shift.py "http://www.adamkramer.uk/browser-check.php"
+e.g: shape_shift.py "http://adamkramer.uk/browser-test.php"
   
   
