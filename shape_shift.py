@@ -1,6 +1,31 @@
 import urllib.request
 import sys
+import json
 
+proxylist_matrix = [
+					["United States", "US", ""],
+					["China", "CN", ""],
+					["Japan", "JP", ""],
+					["Germany", "DE", ""],
+					["United Kingdom", "GB", ""],
+					["France", "FR", ""],
+					["India", "IN", ""],
+					["Italy", "IT", ""],
+					["Brazil", "BR", ""],
+					["Canada", "CA", ""],
+					["South Korea", "KR", ""],
+					["Russia", "RU", ""],
+					["Australia", "AU", ""],
+					["Spain", "ES", ""],
+					["Mexico", "MX", ""],
+					["Indonesia", "ID", ""],
+					["Turkey", "TR", ""],
+					["Netherlands", "NL", ""],
+					["Switzerland", "CH", ""],
+					["Saudi Arabia", "SA", ""],
+					["Argentina", "AR", ""]
+					]
+					
 # User Agents below obtained from http://www.networkinghowtos.com/howto/common-user-agent-list/
 useragent_matrix = [
 					["Google Chrome", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36", ""],
@@ -25,26 +50,39 @@ useragent_matrix = [
 					["Wget","Wget/1.15 (linux-gnu)",""],
 					["Lynx","Lynx/2.8.8pre.4 libwww-FM/2.14 SSL-MM/1.4.1 GNUTLS/2.12.23",""]
 					]
-					
 	
-# Inform the user which useragent will be used as the control value	
-print ("Responses will be compared against " + useragent_matrix[0][0] + " as a control value")
-
+for i in range(len(proxylist_matrix)):
+	print ("[INFO] Attempting to obtain proxy server which geo-locates to " + proxylist_matrix[i][0])
+	resp = urllib.request.urlopen("https://gimmeproxy.com/api/getProxy?user-agent=true&anonymityLevel=1&supportsHttps=true&country=" + proxylist_matrix[i][1])
+	resp_json_decoded = json.loads(resp.read())
+	proxylist_matrix[i][2] = resp_json_decoded['ip'] + ":" + resp_json_decoded['port']
+	print ("[INFO] Proxy server obtained for " + proxylist_matrix[i][0] + " - " + proxylist_matrix[i][2])
+	
 # Loop through each user agent in the array				
-for i in range(len(useragent_matrix)):
+	for j in range(len(useragent_matrix)):
 
-	print ("Sending query with User-Agent: " + useragent_matrix[i][0])
+		print ("Sending query with User-Agent: " + useragent_matrix[j][0])
 	
-	# Set user agent as current iteration from array
-	custom_headers = {}
-	custom_headers['User-Agent'] = useragent_matrix[i][1]
-	req = urllib.request.Request(sys.argv[1], headers = custom_headers)
+		# Set proxy per current iteration from the proxylist matrix
+		proxy_handler = urllib.request.ProxyHandler({'http': proxylist_matrix[i][2], 'https' : proxylist_matrix[i][2]})
+		proxy_opener = urllib.request.build_opener(proxy_handler)
+		urllib.request.install_opener(proxy_opener)
+		
+		# Set user agent as current iteration from array
+		custom_headers = {}
+		custom_headers['User-Agent'] = useragent_matrix[j][1]
+		req = urllib.request.Request(sys.argv[1], headers = custom_headers)
 	
-	# Send request and receive response into the array
-	resp = urllib.request.urlopen(req)
-	useragent_matrix[i][2] = resp.read()
+		# Send request and receive response into the array
+		try:
+			resp = urllib.request.urlopen(req)
+			useragent_matrix[j][2] = resp.read()
+		except:
+			print ("[ERROR] Could not request when connecting via " + proxylist_matrix[i][0] + " proxy")
+			continue
 	
-	# Ignore first iteration (as we'll have nothing to compare against) - perform basic comparison and inform user if appropriate
-	if i > 0:
-		if useragent_matrix[i][2] != useragent_matrix[0][2]:
-			print ("*** DIFFERENCE detected when using User-Agent: " + useragent_matrix[i][0] + " ***")
+		# Ignore first iteration (as we'll have nothing to compare against) - perform basic comparison and inform user if appropriate
+		if j > 0:
+			if useragent_matrix[j][2] != useragent_matrix[0][2]:
+				print ("[ALERT] DIFFERENCE detected when using Geo-location " + proxylist_matrix[i][0] + " User-Agent: " + useragent_matrix[j][0])
+
