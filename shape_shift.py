@@ -1,6 +1,12 @@
 import urllib.request
 import sys
 import json
+import time
+import difflib
+
+# List of countries which we want appear to be coming from - 
+# Add/remove per your requirements - second field is ISO_3166 country code 
+# Country codes can be obtained from: https://en.wikipedia.org/wiki/ISO_3166-1#Current_codes
 
 proxylist_matrix = [
 					["United States", "US", ""],
@@ -27,6 +33,8 @@ proxylist_matrix = [
 					]
 					
 # User Agents below obtained from http://www.networkinghowtos.com/howto/common-user-agent-list/
+# Add / remove per your requirements - first field is friendly name, second field is user-agent you want to send
+
 useragent_matrix = [
 					["Google Chrome", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36", ""],
 					["Mozilla Firefox","Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0",""],
@@ -50,25 +58,114 @@ useragent_matrix = [
 					["Wget","Wget/1.15 (linux-gnu)",""],
 					["Lynx","Lynx/2.8.8pre.4 libwww-FM/2.14 SSL-MM/1.4.1 GNUTLS/2.12.23",""]
 					]
-	
-for i in range(len(proxylist_matrix)):
-	print ("[INFO] Attempting to obtain proxy server which geo-locates to " + proxylist_matrix[i][0])
-	resp = urllib.request.urlopen("https://gimmeproxy.com/api/getProxy?user-agent=true&anonymityLevel=1&supportsHttps=true&country=" + proxylist_matrix[i][1])
-	resp_json_decoded = json.loads(resp.read())
-	proxylist_matrix[i][2] = resp_json_decoded['ip'] + ":" + resp_json_decoded['port']
-	print ("[INFO] Proxy server obtained for " + proxylist_matrix[i][0] + " - " + proxylist_matrix[i][2])
-	
-# Loop through each user agent in the array				
-	for j in range(len(useragent_matrix)):
 
-		print ("Sending query with User-Agent: " + useragent_matrix[j][0])
+# Shameless welcome banner					
+print ("########### SHAPE_SHIFTER v1.0 - Adam Kramer 2017 #############")
+
+# STAGE 1
+# 1. Find working proxies for each of the required countries
+# 2. Test proxies by connecting to them and having 3rd party site geo-locate the IP to verify it matches requirements
+
+print ("################### STAGE 1 - SETUP PHASE #####################")
 	
-		# Set proxy per current iteration from the proxylist matrix
-		proxy_handler = urllib.request.ProxyHandler({'http': proxylist_matrix[i][2], 'https' : proxylist_matrix[i][2]})
+# Iterate through each of the required countries in the proxy list matrix
+for i in range(len(proxylist_matrix)):
+
+	# If the proxy field (3rd field) is not empty - skip attempt to obtain, as user has hard coded their preferred proxy in
+	if (proxylist_matrix[i][2] != ""):
+		print("[INFO] Skipping - IP field in script for " + proxylist_matrix[i][0] + " is not blank")
+		continue
+
+	# Loop will 
+	while True:
+	
+		# Clear any proxies that have been set so far
+		proxy_handler = urllib.request.ProxyHandler({})
 		proxy_opener = urllib.request.build_opener(proxy_handler)
 		urllib.request.install_opener(proxy_opener)
 		
-		# Set user agent as current iteration from array
+		# Inform user which proxy server we are attempting to obtain 
+		print ("[INFO] Attempting to obtain proxy server which geo-locates to " + proxylist_matrix[i][0])
+		
+		# Connect to website which provides proxies and obtain json response
+		try:
+			# There are plenty of websites which let you obtain proxies via API query
+			# I have selected the website which was the top google result - replace per your preference
+			resp = urllib.request.urlopen("https://gimmeproxy.com/api/getProxy?user-agent=true&anonymityLevel=1&supportsHttps=true&country=" + proxylist_matrix[i][1])
+		# Broad error catching - if website can't be accessed then keep trying after 5 second pause
+		except:
+			print ("[ERROR] Error during proxy request - pausing for 5 seconds, then attempting retry")
+			time.sleep(5)
+			continue
+		
+		# Read output which is returned from proxy list website, decode json and extract IP/port details
+		resp_json_decoded = json.loads(resp.read())
+		proxylist_matrix[i][2] = resp_json_decoded['ip'] + ":" + resp_json_decoded['port']
+		print ("[INFO] Proxy server obtained for " + proxylist_matrix[i][0] + " - " + proxylist_matrix[i][2])
+	
+		# Set obtained details as proxy currently in use
+		proxy_handler = urllib.request.ProxyHandler({'http': proxylist_matrix[i][2], 'https' : proxylist_matrix[i][2]})
+		proxy_opener = urllib.request.build_opener(proxy_handler)
+		urllib.request.install_opener(proxy_opener)
+	
+		# Connect to 3rd party website to verify that the proxy is working, and that the geo-location is per requirements
+		try:
+			resp = urllib.request.urlopen("https://ip-api.io/json/" + resp_json_decoded['ip'])
+		except:
+			print ("[ERROR] Error caught during testing attempt - requesting new proxy")
+			continue
+			
+		# Response should contain required country name - if not, we will continue to next loop iteration and try another proxy
+		test_resp_data = resp.read()
+		if (proxylist_matrix[i][0] in str(test_resp_data)):
+			print ("[INFO] " + proxylist_matrix[i][0] + " proxy tested (including verifying geo-location), appears ok")
+			# break means we're happy, and we're leaving the infinite loop and onto obtaining proxy for next country
+			break
+			
+		print ("[INFO] Testing showed proxy server not responding, or geo-location incorrect - requesting a new one")
+
+# Inform user that we have obtained working proxies for all requested countries
+print ("[INFO] Obtained all requested proxies - progressing to testing phase")
+print ("################### STAGE 2 - TESTING PHASE #####################")
+print ("[INFO] Each response will be compared against your default IP and user-agent " + useragent_matrix[0][0])
+
+# Obtain a control value based on default IP / first user-agent in the list
+proxy_handler = urllib.request.ProxyHandler({})
+proxy_opener = urllib.request.build_opener(proxy_handler)
+urllib.request.install_opener(proxy_opener)
+
+# Set user-agent as first item from user-agent array
+custom_headers = {}
+custom_headers['User-Agent'] = useragent_matrix[0][1]
+req = urllib.request.Request(sys.argv[1], headers = custom_headers)
+	
+# Send request and receive response into the array
+while True:
+	try:
+		resp = urllib.request.urlopen(req)
+		control_website_response = resp.read()
+		break
+	except:
+		print ("[ERROR] Could not request website when connecting via default IP, retrying...")
+		time.sleep(5)
+	
+# Iterate through each requested country
+for i in range(len(proxylist_matrix)):
+
+	# Inform user that we are connecting to current iterations proxy
+	print ("[INFO] Connecting to proxy server obtained for " + proxylist_matrix[i][0] + " - " + proxylist_matrix[i][2])
+	
+	# Connect to proxy
+	proxy_handler = urllib.request.ProxyHandler({'http': proxylist_matrix[i][2], 'https' : proxylist_matrix[i][2]})
+	proxy_opener = urllib.request.build_opener(proxy_handler)
+	urllib.request.install_opener(proxy_opener)
+	
+	# Iterate through each required user-agent
+	for j in range(len(useragent_matrix)):
+
+		print ("[INFO] Sending query with User-Agent: " + useragent_matrix[j][0])
+	
+		# Set user-agent as current iteration from array
 		custom_headers = {}
 		custom_headers['User-Agent'] = useragent_matrix[j][1]
 		req = urllib.request.Request(sys.argv[1], headers = custom_headers)
@@ -80,9 +177,17 @@ for i in range(len(proxylist_matrix)):
 		except:
 			print ("[ERROR] Could not request when connecting via " + proxylist_matrix[i][0] + " proxy")
 			continue
-	
-		# Ignore first iteration (as we'll have nothing to compare against) - perform basic comparison and inform user if appropriate
-		if j > 0:
-			if useragent_matrix[j][2] != useragent_matrix[0][2]:
-				print ("[ALERT] DIFFERENCE detected when using Geo-location " + proxylist_matrix[i][0] + " User-Agent: " + useragent_matrix[j][0])
 
+		# Check whether current response is different from the control value
+		if useragent_matrix[j][2] != control_website_response:
+			
+			# Inform user that we've found one that is different from the control value
+			print ("[ALERT] DIFFERENCE detected when using geo-location " + proxylist_matrix[i][0] + " User-Agent: " + useragent_matrix[j][0])
+			print ("[ALERT] Details of the differences:")
+				
+			# Show the user the DIFF details
+			test_data_1 = useragent_matrix[0][2].splitlines()
+			test_data_2 = useragent_matrix[j][2].splitlines()
+			differ_instance = difflib.Differ()
+			diff_data = differ_instance.compare(test_data_1, test_data_2)
+			print('\n'.join(diff_data))
