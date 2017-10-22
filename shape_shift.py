@@ -92,7 +92,7 @@ for i in range(len(proxylist_matrix)):
 		try:
 			# There are plenty of websites which let you obtain proxies via API query
 			# I have selected the website which was the top google result - replace per your preference
-			resp = urllib.request.urlopen("https://gimmeproxy.com/api/getProxy?user-agent=true&anonymityLevel=1&supportsHttps=true&country=" + proxylist_matrix[i][1])
+			resp = urllib.request.urlopen("https://gimmeproxy.com/api/getProxy?user-agent=true&anonymityLevel=1&supportsHttps=true&country=" + proxylist_matrix[i][1], timeout = 5)
 		# Broad error catching - if website can't be accessed then keep trying after 5 second pause
 		except:
 			print ("[ERROR] Error during proxy request - pausing for 5 seconds, then attempting retry")
@@ -111,7 +111,7 @@ for i in range(len(proxylist_matrix)):
 	
 		# Connect to 3rd party website to verify that the proxy is working, and that the geo-location is per requirements
 		try:
-			resp = urllib.request.urlopen("https://ip-api.io/json/" + resp_json_decoded['ip'])
+			resp = urllib.request.urlopen("https://ip-api.io/json/" + resp_json_decoded['ip'], timeout = 5)
 		except:
 			print ("[ERROR] Error caught during testing attempt - requesting new proxy")
 			continue
@@ -143,7 +143,7 @@ req = urllib.request.Request(sys.argv[1], headers = custom_headers)
 # Send request and receive response into the array
 while True:
 	try:
-		resp = urllib.request.urlopen(req)
+		resp = urllib.request.urlopen(req, timeout = 5)
 		control_website_response = resp.read()
 		break
 	except:
@@ -173,7 +173,7 @@ for i in range(len(proxylist_matrix)):
 	
 		# Send request and receive response into the array
 		try:
-			resp = urllib.request.urlopen(req)
+			resp = urllib.request.urlopen(req, timeout = 5) 
 			current_website_response = resp.read()
 		except:
 			print ("[ERROR] Could not request when connecting via " + proxylist_matrix[i][0] + " proxy")
