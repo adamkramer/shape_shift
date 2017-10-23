@@ -4,7 +4,7 @@ import json
 import time
 import difflib
 
-# List of countries which we want appear to be coming from - list below selected based on top 20 countries by GDP
+# List of countries which we want appear to be coming from - 
 # Add/remove per your requirements - second field is ISO_3166 country code 
 # Country codes can be obtained from: https://en.wikipedia.org/wiki/ISO_3166-1#Current_codes
 # If you have preferred proxy for a particular country, place it in the 3rd field in format IP:port and it will be used
@@ -77,7 +77,7 @@ for i in range(len(proxylist_matrix)):
 		print("[INFO] Skipping - IP field in script for " + proxylist_matrix[i][0] + " is not blank")
 		continue
 
-	# Loop will ensure we re-try until we get a working proxy server for the respective country
+	# Loop will 
 	while True:
 	
 		# Clear any proxies that have been set so far
@@ -94,6 +94,8 @@ for i in range(len(proxylist_matrix)):
 			# I have selected the website which was the top google result - replace per your preference
 			resp = urllib.request.urlopen("https://gimmeproxy.com/api/getProxy?user-agent=true&anonymityLevel=1&supportsHttps=true&country=" + proxylist_matrix[i][1], timeout = 5)
 		# Broad error catching - if website can't be accessed then keep trying after 5 second pause
+		except (KeyboardInterrupt, SystemExit):
+			raise
 		except:
 			print ("[ERROR] Error during proxy request - pausing for 5 seconds, then attempting retry")
 			time.sleep(5)
@@ -112,6 +114,8 @@ for i in range(len(proxylist_matrix)):
 		# Connect to 3rd party website to verify that the proxy is working, and that the geo-location is per requirements
 		try:
 			resp = urllib.request.urlopen("https://ip-api.io/json/" + resp_json_decoded['ip'], timeout = 5)
+		except (KeyboardInterrupt, SystemExit):
+			raise
 		except:
 			print ("[ERROR] Error caught during testing attempt - requesting new proxy")
 			continue
@@ -146,6 +150,12 @@ while True:
 		resp = urllib.request.urlopen(req, timeout = 5)
 		control_website_response = resp.read()
 		break
+	except (KeyboardInterrupt, SystemExit):
+		raise		
+	except urllib.error.HTTPError as e:
+		print ("[INFO] Detected HTTP error: " + str(e.code) + " - this may be intentional(?)")
+		control_website_response = e.read()
+		break
 	except:
 		print ("[ERROR] Could not request website when connecting via default IP, retrying...")
 		time.sleep(5)
@@ -175,10 +185,15 @@ for i in range(len(proxylist_matrix)):
 		try:
 			resp = urllib.request.urlopen(req, timeout = 5) 
 			current_website_response = resp.read()
+		except (KeyboardInterrupt, SystemExit):
+			raise		
+		except urllib.error.HTTPError as e:
+			print ("[INFO] Detected HTTP error: " + str(e.code) + " - this may be intentional(?)")
+			current_website_response = e.read()
 		except:
 			print ("[ERROR] Could not request when connecting via " + proxylist_matrix[i][0] + " proxy")
 			continue
-
+			
 		# Check whether current response is different from the control value
 		if current_website_response != control_website_response:
 			
@@ -187,8 +202,8 @@ for i in range(len(proxylist_matrix)):
 			print ("[ALERT] Details of the differences:")
 				
 			# Show the user the DIFF details
-			test_data_1 = control_website_response.splitlines()
-			test_data_2 = current_website_response.splitlines()
+			test_data_1 = control_website_response.decode().splitlines()
+			test_data_2 = current_website_response.decode().splitlines()
 			differ_instance = difflib.Differ()
 			diff_data = differ_instance.compare(test_data_1, test_data_2)
 			print('\n'.join(diff_data))
