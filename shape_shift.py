@@ -12,7 +12,7 @@ import difflib
 proxylist_matrix = [
 					["United States", "US", ""],
 					["China", "CN", ""],
-					["Japan", "JP", ""],
+#					["Japan", "JP", ""],
 					["Germany", "DE", ""],
 					["United Kingdom", "GB", ""],
 #					["France", "FR", ""],
