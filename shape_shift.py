@@ -4,7 +4,7 @@ import json
 import time
 import difflib
 
-# List of countries which we want appear to be coming from - 
+# List of countries which we want appear to be coming from - list below selected based on top 20 countries by GDP
 # Add/remove per your requirements - second field is ISO_3166 country code 
 # Country codes can be obtained from: https://en.wikipedia.org/wiki/ISO_3166-1#Current_codes
 # If you have preferred proxy for a particular country, place it in the 3rd field in format IP:port and it will be used
@@ -77,7 +77,7 @@ for i in range(len(proxylist_matrix)):
 		print("[INFO] Skipping - IP field in script for " + proxylist_matrix[i][0] + " is not blank")
 		continue
 
-	# Loop will 
+	# Loop will ensure we re-try until we get a working proxy server for the respective country
 	while True:
 	
 		# Clear any proxies that have been set so far
