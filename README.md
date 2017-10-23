@@ -2,8 +2,10 @@
 
 Identifies and leverages a diverse combination of proxies and user-agents to see whether there are any changes based on who is visiting the site.
 
+Requires: Python v3.x
+
 Steps -
-1. Obtain a list of live proxies which represent various geo-locations an proxy list API
+1. Obtain a list of live proxies which represent various geo-locations via proxy list API
 2. Check which are working, and verify that they represent the required geo-location
 3. Use the proxy to connect to the site and iterate through various user-agents reading the data returned
 4. Compare for outliers and highlight to the user
