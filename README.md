@@ -1,6 +1,6 @@
 # shape_shift
 
-Identifies and leverages a diverse combination of proxies and user-agents to see whether there are any changes based on who is visiting the site.
+Identifies and leverages a diverse combination of proxies and user-agents to see whether there are any changes based on who is visiting a particular site.
 
 Requires: Python v3.x
 
