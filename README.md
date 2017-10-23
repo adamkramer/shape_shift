@@ -14,7 +14,9 @@ Will identify whether server alters it's response depending on geo-location of s
 Useful for triage during web based malware analysis.
 
 Usage: shape_shift.py <url>
+  
 e.g: shape_shift.py "http://adamkramer.uk/browser-test.php"
+  
 e.g. shape_shift.py "http://adamkramer.uk/browser-test-404.php"
   
   
