@@ -63,7 +63,7 @@ useragent_matrix = [
 # Shameless welcome banner					
 print ("########### SHAPE_SHIFTER v1.0 - Adam Kramer 2017 #############")
 
-# If user has not provided arguement, then inform them what is required
+# If user has not provided an argument, then inform them what is required
 if ((len(sys.argv)) < 2):
 	print ("Usage: shape_shift.py <url> - where url is the site to be analysed")
 	sys.exit(1)
