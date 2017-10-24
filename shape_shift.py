@@ -91,7 +91,7 @@ for i in range(len(proxylist_matrix)):
 		urllib.request.install_opener(proxy_opener)
 		
 		# Inform user which proxy server we are attempting to obtain 
-		print ("[INFO] Attempting to obtain proxy server which geo-locates to " + proxylist_matrix[i][0])
+		print ("[INFO] Attempting to obtain proxy server which geolocates to " + proxylist_matrix[i][0])
 		
 		# Connect to website which provides proxies and obtain json response
 		try:
