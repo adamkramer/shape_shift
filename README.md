@@ -20,3 +20,6 @@ e.g: shape_shift.py "http://adamkramer.uk/browser-test.php"
 e.g. shape_shift.py "http://adamkramer.uk/browser-test-404.php"
   
   
+  Further information, and a demonstration can be found in the associated blog post:
+  https://digital-forensics.sans.org/blog/2017/10/24/uncover-targeted-web-malware
+  
