@@ -132,7 +132,7 @@ for i in range(len(proxylist_matrix)):
 			# break means we're happy, and we're leaving the infinite loop and onto obtaining proxy for next country
 			break
 			
-		print ("[INFO] Testing showed proxy server not responding, or geo-location incorrect - requesting a new one")
+		print ("[INFO] Testing showed proxy server not responding, or geolocation incorrect - requesting a new one")
 
 # Inform user that we have obtained working proxies for all requested countries
 print ("[INFO] Obtained all requested proxies - progressing to testing phase")
@@ -203,7 +203,7 @@ for i in range(len(proxylist_matrix)):
 		if current_website_response != control_website_response:
 			
 			# Inform user that we've found one that is different from the control value
-			print ("[ALERT] DIFFERENCE detected when using geo-location " + proxylist_matrix[i][0] + " User-Agent: " + useragent_matrix[j][0])
+			print ("[ALERT] DIFFERENCE detected when using geolocation: " + proxylist_matrix[i][0] + " & user-agent: " + useragent_matrix[j][0])
 			print ("[ALERT] Details of the differences:")
 				
 			# Show the user the DIFF details
