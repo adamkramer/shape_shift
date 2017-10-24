@@ -202,8 +202,8 @@ for i in range(len(proxylist_matrix)):
 			print ("[ALERT] Details of the differences:")
 				
 			# Show the user the DIFF details
-			test_data_1 = control_website_response.decode().splitlines()
-			test_data_2 = current_website_response.decode().splitlines()
+			test_data_1 = control_website_response.decode(errors="ignore").splitlines()
+			test_data_2 = current_website_response.decode(errors="ignore").splitlines()
 			differ_instance = difflib.Differ()
 			diff_data = differ_instance.compare(test_data_1, test_data_2)
 			print('\n'.join(diff_data))
