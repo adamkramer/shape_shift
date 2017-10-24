@@ -70,7 +70,7 @@ if ((len(sys.argv)) < 2):
 
 # STAGE 1
 # 1. Find working proxies for each of the required countries
-# 2. Test proxies by connecting to them and having 3rd party site geo-locate the IP to verify it matches requirements
+# 2. Test proxies by connecting to them and having 3rd party site geolocate the IP to verify it matches requirements
 
 print ("################### STAGE 1 - SETUP PHASE #####################")
 	
@@ -116,7 +116,7 @@ for i in range(len(proxylist_matrix)):
 		proxy_opener = urllib.request.build_opener(proxy_handler)
 		urllib.request.install_opener(proxy_opener)
 	
-		# Connect to 3rd party website to verify that the proxy is working, and that the geo-location is per requirements
+		# Connect to 3rd party website to verify that the proxy is working, and that the geolocation is per requirements
 		try:
 			resp = urllib.request.urlopen("https://ip-api.io/json/" + resp_json_decoded['ip'], timeout = 5)
 		except (KeyboardInterrupt, SystemExit):
@@ -128,7 +128,7 @@ for i in range(len(proxylist_matrix)):
 		# Response should contain required country name - if not, we will continue to next loop iteration and try another proxy
 		test_resp_data = resp.read()
 		if (proxylist_matrix[i][0] in str(test_resp_data)):
-			print ("[INFO] " + proxylist_matrix[i][0] + " proxy tested (including verifying geo-location), appears ok")
+			print ("[INFO] " + proxylist_matrix[i][0] + " proxy tested (including verifying geolocation), appears ok")
 			# break means we're happy, and we're leaving the infinite loop and onto obtaining proxy for next country
 			break
 			
