@@ -13,7 +13,7 @@ Steps -
 Will identify whether server alters it's response depending on geo-location of source IP / User-Agent which is presented.
 Useful for triage during web based malware analysis.
 
-Usage: shape_shift.py <url>
+Usage: shape_shift.py (url) - where url is the site which is to be analysed
   
 e.g: shape_shift.py "http://adamkramer.uk/browser-test.php"
   
