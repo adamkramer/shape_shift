@@ -10,7 +10,7 @@ Steps -
 3. Use the proxy to connect to the site and iterate through various user-agents reading the data returned
 4. Compare for outliers and highlight to the user
 
-Will identify whether server alters it's response depending on geolocation of source IP / User-Agent which is presented.
+Will identify whether server alters its response depending on geolocation of source IP / user-agent which is presented.
 Useful for triage during web based malware analysis.
 
 Usage: shape_shift.py (url) - where url is the site which is to be analysed
